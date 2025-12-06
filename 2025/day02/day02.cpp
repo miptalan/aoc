@@ -1,11 +1,11 @@
 #include <iostream>
 #include <fstream>
-#include <ostream>
 #include <string>
 #include <sstream>
 #include <vector>
 #include <cstdint>
-#include <ranges>
+#include <algorithm>
+#include <unordered_map>
 
 struct Interval {
     std::uint64_t l;
@@ -104,7 +104,47 @@ int main() {
     std::cout << "Part 1: " << result1 << "\n";
 
     std::cout << "======= Part 2 ======\n";
-    
+    std::uint64_t result2 {0};
+    const auto max_interval = *std::ranges::max_element(input, [](const auto& lhs, const auto& rhs) {return lhs.r < rhs.r;});
+    const auto max_divisor_pow = static_cast<int>(std::ceil(std::log10(max_interval.r)));
+    std::unordered_map<int, std::vector<std::uint64_t>> divisors;
+    for (auto i = 2; i <= max_divisor_pow; ++i) {
+        for (auto p = 1; p < i; ++p) {
+            if (i % p == 0) {
+                auto d = i / p;
+                auto p10 = pow10(p);
+                auto result {1u};
+                for (; d > 1; --d) {
+                    result = result * p10 + 1;
+                }
+                divisors[i].push_back(result);
+            }
+        }
+    }
+
+    for (const auto& divisor : divisors) {
+        std::cout << "divisor[" << divisor.first << "] = ";
+        for (const auto& d : divisor.second) {
+            std::cout << d << " ";
+        }
+        std::cout << '\n';
+    }
+
+    for (const auto& interval : input) {
+        std::cout << "Traversing " << interval << "\n";
+        for (auto i = interval.l; i <= interval.r; i++) {
+            for (const auto d : divisors[static_cast<int>(std::ceil(std::log10(i)))]) {
+                if (i % d == 0) {
+                    std::cout << i << " ";
+                    result2 += i;
+                    break;
+                }
+            }
+        }
+        std::cout << '\n';
+    }
+
+    std::cout << "Part 2: " << result2 << "\n";
 
     return 0;
 }
