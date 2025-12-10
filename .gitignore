@@ -167,3 +167,4 @@ cython_debug/
 
 # Advent of code
 input.txt
+.DS_Store
